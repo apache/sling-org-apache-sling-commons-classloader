@@ -37,9 +37,9 @@
     </description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/sling/trunk/bundles/commons/classloader</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/sling/trunk/bundles/commons/classloader</developerConnection>
-        <url>http://svn.apache.org/viewvc/sling/trunk/bundles/commons/classloader</url>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-commons-classloader.git</conncetion>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-commons-classloader.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-commons-classloader.git</url>
     </scm>
 
     <properties>
