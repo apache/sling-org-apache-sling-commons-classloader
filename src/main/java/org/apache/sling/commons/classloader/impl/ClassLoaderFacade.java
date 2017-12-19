@@ -146,6 +146,15 @@ public class ClassLoaderFacade extends ClassLoader implements DynamicClassLoader
                 }
             }
         }
+        if (name.startsWith("sun.reflect.") || name.startsWith("jdk.internal.reflect.")) {
+            try {
+                return ClassLoader.getSystemClassLoader().loadClass(name);
+            } catch (ClassNotFoundException cnfe) {
+                // we just ignore this and throw our own exception
+            } catch (Throwable t) {
+                logger.error("Exception while trying to load class " + name + " from class loader " + ClassLoader.getSystemClassLoader(), t);
+            }
+        }
         throw new ClassNotFoundException(name);
     }
 
