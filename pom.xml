@@ -29,7 +29,7 @@
 
     <artifactId>org.apache.sling.commons.classloader</artifactId>
     <packaging>bundle</packaging>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2</version>
 
     <name>Apache Sling Dynamic Class Loader Support</name>
     <description>
@@ -40,7 +40,8 @@
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-commons-classloader.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-commons-classloader.git</developerConnection>
         <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-commons-classloader.git</url>
-    </scm>
+      <tag>org.apache.sling.commons.classloader-1.4.2</tag>
+  </scm>
 
     <properties>
         <bundle.build.name>
