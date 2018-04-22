@@ -65,6 +65,9 @@
                         <Bundle-Activator>
                             org.apache.sling.commons.classloader.impl.Activator
                         </Bundle-Activator>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.apache.sling.commons.classloader.DynamicClassLoaderManager
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
