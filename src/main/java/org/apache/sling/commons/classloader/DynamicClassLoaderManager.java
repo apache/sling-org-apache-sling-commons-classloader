@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The dynamic class loader manager is a central
  * service managing all dynamic class loaders.
  * It provides a class loader that can be used by
- * bundles requiring access to all publically available
+ * bundles requiring access to all publicly available
  * classes.
  *
  * The default implementation uses the package admin
