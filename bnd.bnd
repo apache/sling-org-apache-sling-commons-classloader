@@ -1,0 +1,8 @@
+Bundle-Activator: org.apache.sling.commons.classloader.impl.Activator
+
+Provide-Capability:\
+  osgi.service;objectClass=org.apache.sling.commons.classloader.DynamicClassLoaderManager
+
+-removeheaders:\
+  Include-Resource,\
+  Private-Package

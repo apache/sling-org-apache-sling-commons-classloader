@@ -28,7 +28,6 @@
     </parent>
 
     <artifactId>org.apache.sling.commons.classloader</artifactId>
-    <packaging>bundle</packaging>
     <version>1.4.3-SNAPSHOT</version>
 
     <name>Apache Sling Dynamic Class Loader Support</name>
@@ -57,19 +56,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>
-                            org.apache.sling.commons.classloader.impl.Activator
-                        </Bundle-Activator>
-                        <Provide-Capability>
-                            osgi.service;objectClass=org.apache.sling.commons.classloader.DynamicClassLoaderManager
-                        </Provide-Capability>
-                    </instructions>
-                </configuration>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
