@@ -16,43 +16,30 @@
  */
 package org.apache.sling.commons.classloader.it;
 
-import static org.junit.Assert.*;
-import static org.ops4j.pax.exam.Constants.*;
-import static org.ops4j.pax.exam.CoreOptions.*;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
 
 import javax.inject.Inject;
 
 import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.CoreOptions;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.options.AbstractDelegateProvisionOption;
-import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.junit.PaxExam;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 @RunWith(PaxExam.class)
-public class DynamicClassLoaderIT {
+public class DynamicClassLoaderIT extends ClassloaderTestSupport {
 
-    // the name of the system property providing the bundle file to be installed and tested
-    private static final String BUNDLE_JAR_SYS_PROP = "project.bundle.file";
-
-    private static MavenArtifactCoordinates commonsOsgi = new MavenArtifactCoordinates("org.apache.sling", "org.apache.sling.commons.osgi", "2.1.0");
+    private static String commonsOsgi = "mvn:org.apache.sling/org.apache.sling.commons.osgi/2.1.0";
     
     @Inject
     protected BundleContext bundleContext;
@@ -89,46 +76,21 @@ public class DynamicClassLoaderIT {
 
     @ProbeBuilder
     public TestProbeBuilder extendProbe(TestProbeBuilder builder) {
-        builder.setHeader(Constants.IMPORT_PACKAGE, "org.osgi.framework,org.apache.sling.commons.classloader");
+        builder.setHeader(Constants.IMPORT_PACKAGE, "org.osgi.framework,org.apache.sling.commons.classloader,org.apache.sling.testing.paxexam");
         builder.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "org.ops4j.pax.exam,org.junit,javax.inject,org.ops4j.pax.exam.options");
         builder.setHeader("Bundle-ManifestVersion", "2");
         return builder;
     }
 
-    @Configuration
-    public static Option[] configuration() {
-
-        final String bundleFileName = System.getProperty( BUNDLE_JAR_SYS_PROP );
-        final File bundleFile = new File( bundleFileName );
-        if ( !bundleFile.canRead() ) {
-            throw new IllegalArgumentException( "Cannot read from bundle file " + bundleFileName + " specified in the "
-                + BUNDLE_JAR_SYS_PROP + " system property" );
-        }
-
-        return options(
-            provision(
-                CoreOptions.bundle( bundleFile.toURI().toString() ),
-                mavenBundle( "org.ops4j.pax.tinybundles", "tinybundles", "1.0.0" ),
-                mavenBundle("org.apache.sling", "org.apache.sling.commons.log", "2.1.2"),
-                mavenBundle("org.apache.felix", "org.apache.felix.eventadmin", "1.2.14"),
-                mavenBundle("org.ops4j.pax.url", "pax-url-mvn", "1.3.5")
-             ),
-             // below is instead of normal Pax Exam junitBundles() to deal
-             // with build server issue
-             new DirectURLJUnitBundlesOption(), 
-             systemProperty("pax.exam.invoker").value("junit"),  
-             bundle("link:classpath:META-INF/links/org.ops4j.pax.exam.invoker.junit.link")
-        );
-    }
-        
     @Test
     public void testPackageAdminClassLoader() throws Exception {
         // check class loader
         assertNotNull(getDynamicClassLoader());
 
+        final URL url = new URL(commonsOsgi);
         Bundle osgiBundle;
-        try ( InputStream input = commonsOsgi.openInputStream() ) {
-            osgiBundle = this.bundleContext.installBundle(commonsOsgi.getMavenBundle().getURL(), input);
+        try ( InputStream input = url.openStream() ) {
+            osgiBundle = this.bundleContext.installBundle(commonsOsgi, input);
         }
         assertNotNull(osgiBundle);
         assertEquals(Bundle.INSTALLED, osgiBundle.getState());
@@ -162,86 +124,6 @@ public class DynamicClassLoaderIT {
             getDynamicClassLoader().loadClass(className);
         } catch (final ClassNotFoundException expected) {
             fail("Class should be available");
-        }
-    }
-
-    /**
-     * Clone of Pax Exam's JunitBundlesOption which uses a direct
-     * URL to the SpringSource JUnit bundle to avoid some weird
-     * repository issues on the Apache build server.
-     */
-    private static class DirectURLJUnitBundlesOption
-        extends AbstractDelegateProvisionOption<DirectURLJUnitBundlesOption> {
-    
-        /**
-         * Constructor.
-         */
-        public DirectURLJUnitBundlesOption(){
-            super(
-                bundle("http://repository.springsource.com/ivy/bundles/external/org.junit/com.springsource.org.junit/4.9.0/com.springsource.org.junit-4.9.0.jar")
-            );
-            noUpdate();
-            startLevel(START_LEVEL_SYSTEM_BUNDLES);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String toString() {
-            return String.format("DirectURLJUnitBundlesOption{url=%s}", getURL());
-        }
-    
-        /**
-         * {@inheritDoc}
-         */
-        protected DirectURLJUnitBundlesOption itself() {
-            return this;
-        }
-    
-    }
-    
-    /**
-     * Helper class which simplifies accesing a Maven artifact based on its coordinates
-     */
-    static class MavenArtifactCoordinates {
-        private String groupId;
-        private String artifactId;
-        private String version;
-        
-        private MavenArtifactCoordinates(String groupId, String artifactId, String version) {
-            this.groupId = groupId;
-            this.artifactId = artifactId;
-            this.version = version;
-        }
-
-        public InputStream openInputStream() throws FileNotFoundException {
-
-            // note that this contains a lot of Maven-related logic, but I did not find the
-            // right set of dependencies to make this work inside the OSGi container
-            // 
-            // The tough part is making sure that this also works on Jenkins where a 
-            // private local repository is specified using -Dmaven.repo.local
-            Path localRepo = Paths.get(System.getProperty("user.home"), ".m2", "repository");
-            String overridenRepo = System.getProperty("maven.repo.local");
-            if ( overridenRepo != null ) {
-                localRepo = Paths.get(overridenRepo);
-            }
-            
-            Path artifact = Paths.get(localRepo.toString(), groupId.replace('.', File.separatorChar), artifactId, version, artifactId+"-" + version+".jar");
-            
-            if ( !artifact.toFile().exists() ) {
-                throw new RuntimeException("Artifact at " + artifact + " does not exist.");
-            }
-            
-            return new FileInputStream(artifact.toFile());
-        }
-        
-        
-        
-        public MavenArtifactProvisionOption getMavenBundle() {
-            
-            return mavenBundle(groupId, artifactId, version);
         }
     }
     
