@@ -21,6 +21,7 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
 import static org.apache.sling.testing.paxexam.SlingOptions.config;
+import static org.apache.sling.testing.paxexam.SlingOptions.eventadmin;
 import static org.apache.sling.testing.paxexam.SlingOptions.paxUrl;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -35,6 +36,7 @@ public abstract class ClassloaderTestSupport extends TestSupport {
             // Sling Commons Classloader
             testBundle("bundle.filename"),
             config(),
+            eventadmin(),
             // testing
             paxUrl(),
             mavenBundle().groupId("org.ops4j.pax.url").artifactId("pax-url-aether").versionAsInProject(),
